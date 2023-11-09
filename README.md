@@ -28,3 +28,24 @@ Alternative Hypothesis: Major outages are not uniformly distributed across regio
 Since the region is a categorical variable, the best test statistic is the TVD of the distribution compared to a uniform distribution. I ran a hypothesis test with 1,000,000 randomly generated distributions of outages with 0.05 as the alpha level. The test resulted in a p-value of 0 which is less than alpha. Therefore, I reject the null hypothesis because there is sufficient evidence that major outages are not uniformly distributed across regions.
 
 This result shows that one way to improve outages in the US is to only focus on certain regions first because they have a higher proportion of major outages in general. However, the shortcoming of this approach is that it doesn't determine the reason for the outages so it doesn't show exactly how to prevent outages. A way to improve this test is to run a hypothesis test of different causes of outages and see if there is a significant result to determine exactly what to improve.
+
+**Model** <br>
+I want to create a regression model that can predict the severity of a outage so that it can be used to find areas where an outage would have large consequences. The variable that is predicted is the number of customers affected because large outages would affect more people. The model should have the lowest mean squared error in order to be as close as possible to the actual severity of the outage.
+
+**Baseline Model** <br>
+I first removed some features like outage duration and observation number because they either can't be known before an outage or they are not relevant to the outage. There were 43 features left of which 5 were nominal and 38 were quantitative. The model imputed missing data and one hot encoded the nominal columns during preprocessing.
+
+The model used a Decision Tree Regressor in order to predict the number of customers affected. The RMSE for the test data was about 408,311 which looks high but the number of customers affected can also be on the order of millions. This error can be reduced with a better model.
+
+**Final Model** <br>
+The improved model has features of price of electricity and amount of electricity sold standardized to region of the country. These are good for the data because different regions usually have different electricity needs and standardizing checks if an amount is large in relation to its area.
+
+In order to find the best model, I tested out a Decision trees, K Nearest Neighbors, Logistic, and Linear regression. For decision trees and KNN, I used GridSearchCV in order to find the best hyperparameters like max depth or number of neighbors. I then tested each model to get the RMSE of each and found that Linear Regression was the best with about 378950. I trained a linear model on the whole dataset as my final model.
+
+**Fairness Evaluation** <br>
+I wanted to see if the model was equally as fair for smaller and larger states so I split up the data by population. I used mean square error as the parity measure because I was measuring the difference between quantitative amounts. The hypotheses are:<br>
+
+Null Hypothesis: The model is fair; the mse for small and large states are roughly the same <br>
+Alternative Hypothesis: The model is unfair; the mse for the subsets are different <br>
+
+I first found the observed differences between predictions and actual amounts for small and large states. Then I permuted the values 10,000 times and compared it to the observed value to get a p value of 0. This is smaller than a regular alpha of 0.05 so I rejected the null hypothesis. The model is unfair when comparing small and large states.
